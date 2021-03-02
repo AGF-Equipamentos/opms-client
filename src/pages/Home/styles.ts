@@ -18,6 +18,10 @@ export const Header = styled.div`
     width: 20px;
   }
 
+  svg {
+    cursor: pointer;
+  }
+
   h1 {
     font-size: 64px;
     font-family: 'Parisienne', serif;
