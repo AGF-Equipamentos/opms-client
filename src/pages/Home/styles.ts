@@ -3,39 +3,28 @@ import styled from 'styled-components';
 export const Container = styled.div`
   display: flex;
   width: 100%;
-  flex-direction: column;
-  padding-bottom: 16px;
-
-  .pvtUi {
-    margin: auto;
-  }
+  flex-direction: row;
+  align-items: center;
+  background: ${props => props.theme.colors.background};
+  margin-bottom: 32px;
 `;
 
 export const Header = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100px;
-  width: 100%;
-  margin-bottom: 32px;
-  background: ${props => props.theme.colors.background};
+  justify-content: space-between;
+
+  span {
+    width: 20px;
+  }
 
   h1 {
-    font-size: 24px;
-    margin-left: 16px;
-  }
-`;
+    font-size: 64px;
+    font-family: 'Parisienne', serif;
 
-export const HeaderMeta = styled.div`
-  max-width: 980px;
-  padding: 16px;
-  display: flex;
-  flex: 1;
-  align-items: center;
-
-  a {
-    color: ${props => props.theme.colors.text};
-    display: flex;
-    align-items: center;
+    strong {
+      font-size: 96px;
+      color: ${props => props.theme.colors.primary};
+    }
   }
 `;

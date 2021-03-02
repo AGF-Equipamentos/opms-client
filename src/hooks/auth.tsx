@@ -9,13 +9,13 @@ interface AuthState {
 interface User {
   id: string;
   name: string;
-  email: string;
+  username: string;
   role: string;
   avatar_url: string;
 }
 
 interface SignInCredentials {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -23,13 +23,13 @@ interface AuthContextData {
   user: User;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
-  loading: boolean;
+  // loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const AuthProvider: React.FC = ({ children }) => {
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<AuthState>(() => {
     const token = localStorage.getItem('@Logen:token');
@@ -44,13 +44,14 @@ const AuthProvider: React.FC = ({ children }) => {
     return {} as AuthState;
   });
 
-  const signIn = useCallback(async ({ email, password }) => {
+  const signIn = useCallback(async ({ username, password }) => {
     const response = await api.post('sessions', {
-      email,
+      username,
       password,
     });
 
     const { token, user } = response.data;
+    api.defaults.headers.authorization = `Bearer ${token}`;
 
     localStorage.setItem('@Logen:token', token);
     localStorage.setItem('@Logen:user', JSON.stringify(user));
@@ -66,7 +67,7 @@ const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: data.user, signIn, signOut, loading }}>
+    <AuthContext.Provider value={{ user: data.user, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

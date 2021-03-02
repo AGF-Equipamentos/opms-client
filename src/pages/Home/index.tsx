@@ -1,12 +1,12 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiArrowLeft, FiEdit, FiX } from 'react-icons/fi';
+import { FiEdit, FiPower, FiX } from 'react-icons/fi';
 import { Table, Container, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { addHours, format, parseISO, subHours } from 'date-fns';
-import { Header, HeaderMeta, Container as Cont } from './styles';
+import { Container as Cont, Header } from './styles';
 import { useFetch } from '../../hooks/useFetch';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
@@ -176,13 +176,18 @@ const Home: React.FC = () => {
   return (
     <>
       <Cont>
-        <Header>
-          <HeaderMeta onClick={signOut}>
-            <FiArrowLeft size={20} />
-            <h1>Status das entregas de Ordens de Produção</h1>
-          </HeaderMeta>
-        </Header>
+        <Container>
+          <Header>
+            <span />
+            <h1>
+              <strong>l</strong>ogen
+            </h1>
+            {/* <h1>Status das entregas de Ordens de Produção</h1> */}
+            <FiPower size={20} onClick={signOut} />
+          </Header>
+        </Container>
       </Cont>
+
       <Modal
         style={{ color: 'black' }}
         show={showNewOP}
@@ -354,7 +359,7 @@ const Home: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={6}>Parece que não há nenhuma OP...</td>
+                <td colSpan={8}>Parece que não há nenhuma OP...</td>
               </tr>
             )}
           </tbody>

@@ -39,6 +39,21 @@ export const AnimationContainer = styled.div`
 
   animation: ${appearFromLeft} 1s;
 
+  img {
+    width: 200px;
+  }
+
+  h3 {
+    font-size: 164px;
+    margin-left: 16px;
+    font-family: 'Parisienne', serif;
+
+    strong {
+      font-size: 196px;
+      color: ${props => props.theme.colors.primary};
+    }
+  }
+
   form {
     margin: 80px 0;
     width: 340px;
