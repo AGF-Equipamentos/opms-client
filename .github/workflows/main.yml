@@ -44,4 +44,4 @@ jobs:
         script: |
           cd ~/app/logen
           yarn
-          pm2 restart agf-bi
+          pm2 restart logen
