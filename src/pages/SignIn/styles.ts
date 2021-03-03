@@ -44,12 +44,11 @@ export const AnimationContainer = styled.div`
   }
 
   h3 {
-    font-size: 164px;
+    font-size: 108px;
     margin-left: 16px;
-    font-family: 'Parisienne', serif;
 
     strong {
-      font-size: 196px;
+      font-size: 164px;
       color: ${props => props.theme.colors.primary};
     }
   }

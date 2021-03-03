@@ -12,6 +12,7 @@ import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
+import logoImg from '../../assets/logo.svg';
 
 export interface Data {
   id: string;
@@ -180,7 +181,10 @@ const Home: React.FC = () => {
           <Header>
             <span />
             <h1>
-              <strong>l</strong>ogen
+              <img src={logoImg} alt="AGF" />
+              <h2>
+                <strong>OP</strong>MS
+              </h2>
             </h1>
             {/* <h1>Status das entregas de Ordens de Produção</h1> */}
             <FiPower size={20} onClick={signOut} />

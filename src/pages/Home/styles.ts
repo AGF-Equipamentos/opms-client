@@ -23,11 +23,21 @@ export const Header = styled.div`
   }
 
   h1 {
-    font-size: 64px;
-    font-family: 'Parisienne', serif;
+    display: flex;
+    margin: 0;
+
+    h2 {
+      margin: 0;
+      font-size: 54px;
+    }
+
+    img {
+      width: 100px;
+      margin-right: 8px;
+    }
 
     strong {
-      font-size: 96px;
+      font-size: 82px;
       color: ${props => props.theme.colors.primary};
     }
   }
