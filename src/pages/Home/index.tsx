@@ -1,18 +1,17 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiEdit, FiPower, FiX } from 'react-icons/fi';
+import { FiEdit, FiX } from 'react-icons/fi';
 import { Table, Container, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { addHours, format, parseISO, subHours } from 'date-fns';
-import { Container as Cont, Header } from './styles';
+import Header from '../../components/Header';
 import { useFetch } from '../../hooks/useFetch';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
-import logoImg from '../../assets/logo.svg';
 
 export interface Data {
   id: string;
@@ -32,8 +31,8 @@ export interface SaveData {
 }
 
 const Home: React.FC = () => {
-  const { data, mutate } = useFetch<Data[]>('ops');
-  const { signOut, user } = useAuth();
+  const { data, mutate } = useFetch<Data[]>('ops', {}, 6000);
+  const { user } = useAuth();
   const [showSave, setShowSave] = useState(false);
   const [showExclude, setShowExclude] = useState(false);
   const [showNewOP, setShowNewOP] = useState(false);
@@ -176,21 +175,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <Cont>
-        <Container>
-          <Header>
-            <span />
-            <h1>
-              <img src={logoImg} alt="AGF" />
-              <h2>
-                <strong>OP</strong>MS
-              </h2>
-            </h1>
-            {/* <h1>Status das entregas de Ordens de Produção</h1> */}
-            <FiPower size={20} onClick={signOut} />
-          </Header>
-        </Container>
-      </Cont>
+      <Header title="" />
 
       <Modal
         style={{ color: 'black' }}

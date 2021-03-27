@@ -10,16 +10,17 @@ interface Response {
 export function useFetch<Data = any, Error = any>(
   url: string,
   params: object = {},
+  refresh = 120000,
 ): Response {
   const { data, error, mutate } = useSWR<Data, Error>(
     url,
     async urlparam => {
       const response = await api.get(urlparam, params);
-      localStorage.setItem(`@Logen:${urlparam}`, JSON.stringify(response.data));
+      localStorage.setItem(`@OPms:${urlparam}`, JSON.stringify(response.data));
       return response.data;
     },
     {
-      refreshInterval: 360000,
+      refreshInterval: refresh,
     },
   );
 

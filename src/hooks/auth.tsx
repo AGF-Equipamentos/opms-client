@@ -32,8 +32,8 @@ const AuthProvider: React.FC = ({ children }) => {
   // const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<AuthState>(() => {
-    const token = localStorage.getItem('@Logen:token');
-    const user = localStorage.getItem('@Logen:user');
+    const token = localStorage.getItem('@OPms:token');
+    const user = localStorage.getItem('@OPms:user');
 
     if (token && user) {
       api.defaults.headers.authorization = `Bearer ${token}`;
@@ -53,15 +53,15 @@ const AuthProvider: React.FC = ({ children }) => {
     const { token, user } = response.data;
     api.defaults.headers.authorization = `Bearer ${token}`;
 
-    localStorage.setItem('@Logen:token', token);
-    localStorage.setItem('@Logen:user', JSON.stringify(user));
+    localStorage.setItem('@OPms:token', token);
+    localStorage.setItem('@OPms:user', JSON.stringify(user));
 
     setData({ token, user });
   }, []);
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@Logen:token');
-    localStorage.removeItem('@Logen:user');
+    localStorage.removeItem('@OPms:token');
+    localStorage.removeItem('@OPms:user');
 
     setData({} as AuthState);
   }, []);
