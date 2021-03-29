@@ -44,12 +44,15 @@ export const AnimationContainer = styled.div`
   }
 
   h3 {
-    font-size: 108px;
-    margin-left: 16px;
+    font-size: 112px;
+    margin-bottom: 0;
+    background-image: linear-gradient(90deg, #fdd000, #e58a00);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 
     strong {
-      font-size: 164px;
-      color: ${props => props.theme.colors.primary};
+      font-size: 60px;
     }
   }
 

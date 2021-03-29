@@ -70,7 +70,7 @@ const SignIn: React.FC = () => {
       <Content>
         <AnimationContainer>
           <h3>
-            <strong>OP</strong>MS
+            OP<strong>MS</strong>
           </h3>
 
           <Form ref={formRef} onSubmit={handleSubmit}>
