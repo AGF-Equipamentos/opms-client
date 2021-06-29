@@ -5,7 +5,7 @@ import { Table, Container, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
-import { addHours, format, parseISO, subHours } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Title } from './styles';
 import Header from '../../components/Header';
 import { useFetch } from '../../hooks/useFetch';
@@ -42,6 +42,11 @@ const Home: React.FC = () => {
   const [opNumber, setOpNumber] = useState('');
   const [opStatus, setOpStatus] = useState('Entrega pendente');
   const { addToast } = useToast();
+
+  const handleNewOp = useCallback(() => {
+    setOpStatus('Entrega pendente');
+    setShowNewOP(true);
+  }, []);
 
   const handleExcludeID = useCallback(opSelected => {
     setOp(opSelected);
@@ -92,7 +97,7 @@ const Home: React.FC = () => {
           return {
             ...opSelected,
             status: opStatus,
-            updated_at: addHours(new Date(), 3).toISOString(),
+            updated_at: new Date().toISOString(),
           };
         }
         return opSelected;
@@ -279,7 +284,7 @@ const Home: React.FC = () => {
           variant="outline-warning"
           size="sm"
           block
-          onClick={() => setShowNewOP(true)}
+          onClick={() => handleNewOp()}
         >
           Nova OP
         </Button>
@@ -320,13 +325,13 @@ const Home: React.FC = () => {
                     <td>{opItem.user.name}</td>
                     <td>
                       {format(
-                        subHours(parseISO(opItem.created_at), 3),
+                        parseISO(opItem.created_at),
                         "dd/MM/yyyy 'às' HH:mm'h'",
                       )}
                     </td>
                     <td>
                       {format(
-                        subHours(parseISO(opItem.updated_at), 3),
+                        parseISO(opItem.updated_at),
                         "dd/MM/yyyy 'às' HH:mm'h'",
                       )}
                     </td>
@@ -396,13 +401,13 @@ const Home: React.FC = () => {
                     <td>{opItem.user.name}</td>
                     <td>
                       {format(
-                        subHours(parseISO(opItem.created_at), 3),
+                        parseISO(opItem.created_at),
                         "dd/MM/yyyy 'às' HH:mm'h'",
                       )}
                     </td>
                     <td>
                       {format(
-                        subHours(parseISO(opItem.updated_at), 3),
+                        parseISO(opItem.updated_at),
                         "dd/MM/yyyy 'às' HH:mm'h'",
                       )}
                     </td>
