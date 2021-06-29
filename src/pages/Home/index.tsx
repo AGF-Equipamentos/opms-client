@@ -6,6 +6,7 @@ import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import { addHours, format, parseISO, subHours } from 'date-fns';
+import { Title } from './styles';
 import Header from '../../components/Header';
 import { useFetch } from '../../hooks/useFetch';
 import { useAuth } from '../../hooks/auth';
@@ -48,6 +49,7 @@ const Home: React.FC = () => {
   }, []);
 
   const handleID = useCallback(opSelected => {
+    setOpStatus('Entrega pendente');
     setOp(opSelected);
     setShowSave(true);
   }, []);
@@ -305,47 +307,126 @@ const Home: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {data.length !== 0 ? (
-              data.map((ops: Data) => (
-                <tr style={{ justifyItems: 'center' }} key={ops.id}>
-                  <td>{renderSwitch(ops.status)}</td>
-                  <td>{ops.op_number}</td>
-                  <td>{ops.part_number}</td>
-                  <td>{ops.description}</td>
-                  <td>{ops.user.name}</td>
-                  <td>
-                    {format(
-                      subHours(parseISO(ops.created_at), 3),
-                      "dd/MM/yyyy 'às' HH:mm'h'",
-                    )}
-                  </td>
-                  <td>
-                    {format(
-                      subHours(parseISO(ops.updated_at), 3),
-                      "dd/MM/yyyy 'às' HH:mm'h'",
-                    )}
-                  </td>
-                  <td>
-                    {user.role === 'admin' ? (
+            {data.filter((opFilter: Data) => opFilter.status !== 'Entregue')
+              .length !== 0 ? (
+              data
+                .filter((opFilter: Data) => opFilter.status !== 'Entregue')
+                .map((opItem: Data) => (
+                  <tr style={{ justifyItems: 'center' }} key={opItem.id}>
+                    <td>{renderSwitch(opItem.status)}</td>
+                    <td>{opItem.op_number}</td>
+                    <td>{opItem.part_number}</td>
+                    <td>{opItem.description}</td>
+                    <td>{opItem.user.name}</td>
+                    <td>
+                      {format(
+                        subHours(parseISO(opItem.created_at), 3),
+                        "dd/MM/yyyy 'às' HH:mm'h'",
+                      )}
+                    </td>
+                    <td>
+                      {format(
+                        subHours(parseISO(opItem.updated_at), 3),
+                        "dd/MM/yyyy 'às' HH:mm'h'",
+                      )}
+                    </td>
+                    <td>
+                      {user.role === 'admin' ? (
+                        <Button
+                          block={false}
+                          variant="link"
+                          onClick={() => handleID(opItem)}
+                          style={{ color: 'white', padding: 0 }}
+                        >
+                          <FiEdit />
+                        </Button>
+                      ) : null}{' '}
                       <Button
-                        block={false}
                         variant="link"
-                        onClick={() => handleID(ops)}
+                        onClick={() => handleExcludeID(opItem)}
                         style={{ color: 'white', padding: 0 }}
                       >
-                        <FiEdit />
+                        <FiX />
                       </Button>
-                    ) : null}{' '}
-                    <Button
-                      variant="link"
-                      onClick={() => handleExcludeID(ops)}
-                      style={{ color: 'white', padding: 0 }}
-                    >
-                      <FiX />
-                    </Button>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan={8}>Parece que não há nenhuma OP...</td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+        <Title>OPs entregues</Title>
+        <Table
+          responsive
+          striped
+          bordered
+          hover
+          variant="dark"
+          style={{
+            textAlign: 'center',
+            marginTop: 12,
+          }}
+        >
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Número OP</th>
+              <th>Produto</th>
+              <th>Descrição</th>
+              <th>Aberto por:</th>
+              <th>Criado:</th>
+              <th>Atualizado:</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.filter((opFilter: Data) => opFilter.status === 'Entregue')
+              .length !== 0 ? (
+              data
+                .filter((opFilter: Data) => opFilter.status === 'Entregue')
+                .map((opItem: Data) => (
+                  <tr style={{ justifyItems: 'center' }} key={opItem.id}>
+                    <td>{renderSwitch(opItem.status)}</td>
+                    <td>{opItem.op_number}</td>
+                    <td>{opItem.part_number}</td>
+                    <td>{opItem.description}</td>
+                    <td>{opItem.user.name}</td>
+                    <td>
+                      {format(
+                        subHours(parseISO(opItem.created_at), 3),
+                        "dd/MM/yyyy 'às' HH:mm'h'",
+                      )}
+                    </td>
+                    <td>
+                      {format(
+                        subHours(parseISO(opItem.updated_at), 3),
+                        "dd/MM/yyyy 'às' HH:mm'h'",
+                      )}
+                    </td>
+                    <td>
+                      {user.role === 'admin' ? (
+                        <Button
+                          block={false}
+                          variant="link"
+                          onClick={() => handleID(opItem)}
+                          style={{ color: 'white', padding: 0 }}
+                        >
+                          <FiEdit />
+                        </Button>
+                      ) : null}{' '}
+                      <Button
+                        variant="link"
+                        onClick={() => handleExcludeID(opItem)}
+                        style={{ color: 'white', padding: 0 }}
+                      >
+                        <FiX />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
             ) : (
               <tr>
                 <td colSpan={8}>Parece que não há nenhuma OP...</td>
