@@ -28,6 +28,28 @@ const Route: React.FC<RouterProps> = ({
 }) => {
   const { user } = useAuth();
 
+  let redirectPath = '/menu';
+
+  switch (user?.department) {
+    case 'Elétrica':
+      redirectPath = `/eletrica`;
+      break;
+    case 'Montagem':
+      redirectPath = `/montagem`;
+      break;
+    case 'Calderaria':
+      redirectPath = `/calderaria`;
+      break;
+    case 'Usinagem':
+      redirectPath = `/usinagem`;
+      break;
+    case 'Pintura':
+      redirectPath = `/pintura`;
+      break;
+    default:
+      redirectPath = `/almoxarifado`;
+  }
+
   return (
     <ReactDOMRoute
       {...rest}
@@ -37,7 +59,7 @@ const Route: React.FC<RouterProps> = ({
         ) : (
           <Redirect
             to={{
-              pathname: isPrivate ? '/' : '/home',
+              pathname: isPrivate ? '/' : redirectPath,
               state: { from: location },
             }}
           />

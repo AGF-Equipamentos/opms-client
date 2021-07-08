@@ -33,7 +33,14 @@ export const Container = styled.div`
       }
     }
 
+    button {
+      background: ${props => props.theme.colors.background};
+      color: ${props => props.theme.colors.text};
+      border: 0;
+    }
+
     svg {
+      margin: 20px;
       cursor: pointer;
     }
   }

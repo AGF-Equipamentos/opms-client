@@ -42,12 +42,30 @@ const SignIn: React.FC = () => {
           abortEarly: false,
         });
 
-        await signIn({
+        const { department } = await signIn({
           username: data.username,
           password: data.password,
         });
 
-        history.push('/home');
+        switch (department) {
+          case 'Elétrica':
+            history.push(`/eletrica`);
+            break;
+          case 'Montagem':
+            history.push(`/montagem`);
+            break;
+          case 'Calderaria':
+            history.push(`/calderaria`);
+            break;
+          case 'Usinagem':
+            history.push(`/usinagem`);
+            break;
+          case 'Pintura':
+            history.push(`/pintura`);
+            break;
+          default:
+            history.push(`/almoxarifado`);
+        }
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);

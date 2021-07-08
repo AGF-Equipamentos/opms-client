@@ -11,6 +11,7 @@ interface User {
   name: string;
   username: string;
   role: string;
+  department: string;
   avatar_url: string;
 }
 
@@ -21,7 +22,7 @@ interface SignInCredentials {
 
 interface AuthContextData {
   user: User;
-  signIn(credentials: SignInCredentials): Promise<void>;
+  signIn(credentials: SignInCredentials): Promise<User>;
   signOut(): void;
   // loading: boolean;
 }
@@ -57,6 +58,8 @@ const AuthProvider: React.FC = ({ children }) => {
     localStorage.setItem('@OPms:user', JSON.stringify(user));
 
     setData({ token, user });
+
+    return response.data.user;
   }, []);
 
   const signOut = useCallback(() => {

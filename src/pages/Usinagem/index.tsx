@@ -31,8 +31,12 @@ export interface SaveData {
   status: string;
 }
 
-const Home: React.FC = () => {
-  const { data, mutate } = useFetch<Data[]>('ops', {}, 6000);
+const Usinagem: React.FC = () => {
+  const { data, mutate } = useFetch<Data[]>(
+    'ops?department=Usinagem',
+    {},
+    6000,
+  );
   const { user } = useAuth();
   const [showSave, setShowSave] = useState(false);
   const [showExclude, setShowExclude] = useState(false);
@@ -182,7 +186,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <Header title="" />
+      <Header  />
 
       <Modal
         style={{ color: 'black' }}
@@ -444,4 +448,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default Usinagem;

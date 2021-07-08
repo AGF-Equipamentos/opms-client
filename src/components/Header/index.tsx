@@ -8,19 +8,21 @@ import logoImg from '../../assets/logo.svg';
 import { useAuth } from '../../hooks/auth';
 
 interface HeaderProps {
-  title: string;
   className?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ children, title, ...rest }) => {
-  const { signOut } = useAuth();
+const Header: React.FC<HeaderProps> = ({ children, ...rest }) => {
+  const { signOut, user } = useAuth();
 
   return (
     <Container {...rest}>
       <HeaderMeta>
-        <Link to="/home">
-          <FiArrowLeft size={20} />
-        </Link>
+        {user.role === 'admin' ? (
+          <Link to="/menu">
+            <FiArrowLeft size={20} />
+          </Link>
+        ) : null}
+
         {children}
         <div>
           <img src={logoImg} alt="AGF" />
@@ -28,7 +30,9 @@ const Header: React.FC<HeaderProps> = ({ children, title, ...rest }) => {
             OP<strong>MS</strong>
           </h2>
         </div>
-        <FiPower size={20} onClick={signOut} />
+        <button type="button" onClick={signOut}>
+          <FiPower size={20} />
+        </button>
       </HeaderMeta>
     </Container>
   );

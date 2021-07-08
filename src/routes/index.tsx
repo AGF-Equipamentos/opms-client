@@ -5,42 +5,25 @@ import Route from './Route';
 
 import SignIn from '../pages/SignIn';
 
-import Home from '../pages/Home';
-
-// const Loader = styled.div`
-//   border: 4px solid ${props => props.theme.colors.text}; /* Light grey */
-//   border-top: 4px solid ${props => props.theme.colors.primary}; /* Blue */
-//   border-radius: 50%;
-//   width: 30px;
-//   height: 30px;
-//   animation: spin 2s linear infinite;
-
-//   @keyframes spin {
-//     0% {
-//       transform: rotate(0deg);
-//     }
-//     100% {
-//       transform: rotate(360deg);
-//     }
-//   }
-// `;
+import Almoxarifado from '../pages/Almoxarifado';
+import Menu from '../pages/Menu';
+import Eletrica from '../pages/Eletrica';
+import Montagem from '../pages/Montagem';
+import Calderaria from '../pages/Calderaria';
+import Pintura from '../pages/Pintura';
+import Usinagem from '../pages/Usinagem';
 
 const Routes: React.FC = () => {
-  // const { loading } = useAuth();
-
-  // if (loading) {
-  //   return (
-  //     <Container>
-  //       <h1 style={{ marginBottom: 16 }}>Carregando...</h1>
-  //       <Loader />
-  //     </Container>
-  //   );
-  // }
-
   return (
     <Switch>
       <Route path="/" exact component={SignIn} />
-      <Route path="/home" component={Home} isPrivate />
+      <Route path="/menu" component={Menu} isPrivate />
+      <Route path="/almoxarifado" component={Almoxarifado} isPrivate />
+      <Route path="/calderaria" component={Calderaria} isPrivate />
+      <Route path="/eletrica" component={Eletrica} isPrivate />
+      <Route path="/montagem" component={Montagem} isPrivate />
+      <Route path="/pintura" component={Pintura} isPrivate />
+      <Route path="/usinagem" component={Usinagem} isPrivate />
     </Switch>
   );
 };
