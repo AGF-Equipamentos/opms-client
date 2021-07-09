@@ -158,6 +158,49 @@ const Almoxarifado: React.FC = () => {
     );
   }
 
+  function renderDepartmentList(department: string): React.ReactNode {
+    switch (department) {
+      case 'Almoxarifado':
+        return (
+          <h5>
+            <Badge variant="danger">{department}</Badge>
+          </h5>
+        );
+      case 'Montagem':
+        return (
+          <h5>
+            <Badge variant="primary">{department}</Badge>
+          </h5>
+        );
+      case 'Usinagem':
+        return (
+          <h5>
+            <Badge variant="light">{department}</Badge>
+          </h5>
+        );
+      case 'Pintura':
+        return (
+          <h5>
+            <Badge variant="info">{department}</Badge>
+          </h5>
+        );
+      case 'Elétrica':
+        return (
+          <h5>
+            <Badge variant="warning">{department}</Badge>
+          </h5>
+        );
+      case 'Calderaria':
+        return (
+          <h5>
+            <Badge variant="secondary">{department}</Badge>
+          </h5>
+        );
+      default:
+        return <td>{department}</td>;
+    }
+  }
+
   const renderSwitch = (param: string): React.ReactNode => {
     switch (param) {
       case 'Entregue parcialmente':
@@ -325,7 +368,7 @@ const Almoxarifado: React.FC = () => {
                     <td>{opItem.part_number}</td>
                     <td>{opItem.description}</td>
                     <td>{opItem.user.name}</td>
-                    <td>{opItem.department}</td>
+                    <td>{renderDepartmentList(opItem.department)}</td>
                     <td>
                       {format(
                         parseISO(opItem.created_at),
