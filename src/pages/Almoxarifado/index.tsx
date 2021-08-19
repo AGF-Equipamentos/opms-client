@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiEdit, FiX } from 'react-icons/fi';
+import { FiEdit, FiX, FiMenu } from 'react-icons/fi';
 import { Table, Container, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
@@ -13,6 +13,8 @@ import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
+import PrintModal from '../../components/PrintModal';
+import { Container as Cont } from '../../components/PrintModal/styles';
 
 export interface Data {
   id: string;
@@ -43,6 +45,12 @@ const Almoxarifado: React.FC = () => {
   const [opNumber, setOpNumber] = useState('');
   const [opStatus, setOpStatus] = useState('Entrega pendente');
   const { addToast } = useToast();
+  const [showCommitsModal, setShowCommitsModal] = useState(false);
+  const [dataCommits, setDataCommits] = useState([]);
+
+  const handleClose = (): void => {
+    setShowCommitsModal(false);
+  };
 
   const handleNewOp = useCallback(() => {
     setOpStatus('Entrega pendente');
@@ -150,6 +158,17 @@ const Almoxarifado: React.FC = () => {
     }
   }, [addToast, data, mutate, opNumber, opStatus]);
 
+  const handleClickButtonShowCommitsModal = useCallback(async opItem => {
+    const response = await api.get(`/commits/${opItem.id}`);
+    setDataCommits(response.data);
+    setShowCommitsModal(true);
+  }, []);
+
+  const handleClickUpdateDeliveryQuantity = useCallback(async opItem => {
+    const response = await api.put(`/commits/${opItem.id}`);
+    setDataCommits(response.data);
+  }, []);
+
   if (!data) {
     return (
       <Container>
@@ -223,11 +242,16 @@ const Almoxarifado: React.FC = () => {
         );
     }
   };
-
   return (
     <>
       <Header />
-
+      <Cont>
+        <PrintModal
+          isOpen={showCommitsModal}
+          handleClose={handleClose}
+          commitsData={dataCommits}
+        />
+      </Cont>
       <Modal
         style={{ color: 'black' }}
         show={showNewOP}
@@ -392,6 +416,16 @@ const Almoxarifado: React.FC = () => {
                           <FiEdit />
                         </Button>
                       ) : null}{' '}
+                      <Button
+                        variant="link"
+                        onClick={
+                          () => handleClickButtonShowCommitsModal(opItem)
+                          // eslint-disable-next-line react/jsx-curly-newline
+                        }
+                        style={{ color: 'white', padding: 0 }}
+                      >
+                        <FiMenu />
+                      </Button>
                       <Button
                         variant="link"
                         onClick={() => handleExcludeID(opItem)}

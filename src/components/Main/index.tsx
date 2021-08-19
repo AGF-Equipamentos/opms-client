@@ -37,7 +37,6 @@ type MainProps = {
 };
 
 const Main: React.FC<MainProps> = department => {
-  console.log(department);
   const { data, mutate } = useFetch<Data[]>(
     `ops?department=${department}`,
     {},
@@ -192,7 +191,7 @@ const Main: React.FC<MainProps> = department => {
 
   return (
     <>
-      <Header  />
+      <Header />
 
       <Modal
         style={{ color: 'black' }}
