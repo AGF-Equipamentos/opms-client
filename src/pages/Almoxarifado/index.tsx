@@ -164,11 +164,6 @@ const Almoxarifado: React.FC = () => {
     setShowCommitsModal(true);
   }, []);
 
-  const handleClickUpdateDeliveryQuantity = useCallback(async opItem => {
-    const response = await api.put(`/commits/${opItem.id}`);
-    setDataCommits(response.data);
-  }, []);
-
   if (!data) {
     return (
       <Container>

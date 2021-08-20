@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Modal, Overlay, Tooltip } from 'react-bootstrap';
 import {
   DataGrid,
   GridCellEditCommitParams,
-  GridInputSelectionModel,
+  GridRowId,
+  GridValueGetterParams,
 } from '@material-ui/data-grid';
+import api from '../../services/api';
 import { Container as Cont } from './styles';
 
 type Commit = {
@@ -35,16 +38,23 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   handleClose,
   commitsData,
 }) => {
-  const [selectionModel, setSelectionModel] = React.useState<
-    GridInputSelectionModel
-  >([]);
+  const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);
   const [rows, setRows] = useState<Commit[]>([]);
   const [dataSelectionModel, setDataSelectionModel] = useState<Commit[]>([]);
+  const [buttonDisable, setButtonDisable] = useState(false);
 
   function handlePreClose(): void {
     setSelectionModel([]);
     handleClose();
   }
+
+  function getBalance(params: GridValueGetterParams): number {
+    const qtyValue = params.getValue(params.id, 'qty') || 0;
+    const qtyDeliveredValue = params.getValue(params.id, 'qty_delivered') || 0;
+
+    return Number(qtyValue) - Number(qtyDeliveredValue);
+  }
+
   useEffect(() => {
     setRows(commitsData);
   }, [commitsData]);
@@ -57,23 +67,30 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     { field: 'description', headerName: 'DESCRIÇÃO', width: 500 },
     {
       field: 'qty_delivered',
-      headerName: 'QUANTIDADE ENTREGUE',
-      width: 250,
+      headerName: 'QTD ENTREGUE',
+      width: 150,
       type: 'number',
       editable: true,
     },
-    { field: 'qty', headerName: 'QUANTIDADE', width: 170 },
+    { field: 'qty', headerName: 'QTD', width: 150 },
+    {
+      field: 'fullName',
+      headerName: 'Saldo',
+      width: 160,
+      editable: true,
+      valueGetter: getBalance,
+      sortComparator: (v1: any, v2: any) =>
+        v1?.toString().localeCompare(v2?.toString()),
+    },
     { field: 'location', headerName: 'LOCAÇÃO', width: 190 },
     { field: 'warehouse', headerName: 'ARMAZEM', width: 150 },
   ];
 
   const handleEditCellChangeCommitted = useCallback(
     (props: GridCellEditCommitParams) => {
-      console.log(props);
       if (props.field === 'qty_delivered') {
         const qty_delivered = props.value;
-        console.log(qty_delivered);
-        console.log(rows);
+        // if(value > saldo)
         const updatedRows = rows.map(row => {
           if (row.id === props.id) {
             return {
@@ -84,15 +101,26 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           return row;
         });
         setRows(updatedRows);
-        // console.log(updatedRows);
-        // const newSelectionData = updatedRows.filter(row =>
-        //   selectionModel.includes(row.id),
-        // );
-        // setDataSelectionModel(newSelectionData);
+        const newSelectionData = updatedRows.filter(row =>
+          selectionModel.includes(row.id),
+        );
+        setDataSelectionModel(newSelectionData);
+        setButtonDisable(false);
       }
     },
-    [rows],
+    [rows, selectionModel],
   );
+
+  const handleClickUpdateDeliveryQuantities = async (): Promise<void> => {
+    await Promise.all(
+      dataSelectionModel.map(async commit => {
+        await api.put(`/commits/${commit.id}`, {
+          qty_delivered: commit.qty_delivered,
+        });
+      }),
+    );
+  };
+
   return (
     <Cont>
       <Modal size="xl" show={isOpen} onHide={handlePreClose}>
@@ -109,16 +137,19 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                 columns={columns}
                 checkboxSelection
                 disableSelectionOnClick
-                // isCellEditable={params => params.row.age % 2 === 0}
+                isCellEditable={params =>
+                  // eslint-disable-next-line prettier/prettier
+                  selectionModel.includes(params.row.id)}
                 onSelectionModelChange={newSelection => {
                   setSelectionModel(newSelection);
                   const newSelectionData = rows.filter(row =>
                     newSelection.includes(row.id),
-                  ); 
+                  );
                   setDataSelectionModel(newSelectionData);
                 }}
                 selectionModel={selectionModel}
                 onCellEditCommit={handleEditCellChangeCommitted}
+                onCellEditStart={() => setButtonDisable(true)}
               />
             </div>
           </div>
@@ -127,7 +158,15 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           <Button variant="secondary" onClick={handlePreClose}>
             Fechar
           </Button>
-          <Button ref={target} variant="warning">
+          <Button
+            disabled={buttonDisable}
+            ref={target}
+            variant="warning"
+            onClick={() => {
+              handleClickUpdateDeliveryQuantities();
+              handlePreClose();
+            }}
+          >
             Salvar
           </Button>
           <Overlay target={target.current} show={show} placement="top">
