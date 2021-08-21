@@ -1,9 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Modal, Overlay, Tooltip } from 'react-bootstrap';
+import { makeStyles } from '@material-ui/styles';
 import {
   DataGrid,
   GridCellEditCommitParams,
+  GridCellValue,
+  GridEditRowsModel,
   GridRowId,
   GridValueGetterParams,
 } from '@material-ui/data-grid';
@@ -42,11 +44,54 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   const [rows, setRows] = useState<Commit[]>([]);
   const [dataSelectionModel, setDataSelectionModel] = useState<Commit[]>([]);
   const [buttonDisable, setButtonDisable] = useState(false);
+  const [, setEditRowsModel] = React.useState<GridEditRowsModel>({});
+  const useStyles = makeStyles(() => {
+    return {
+      root: {
+        '& .Mui-error': {
+          backgroundColor: `rgb(126,10,15,0.1)`,
+          color: 'red',
+        },
+      },
+    };
+  });
+  const classes = useStyles();
 
   function handlePreClose(): void {
     setSelectionModel([]);
     handleClose();
   }
+
+  function validateBalance(
+    id: GridCellValue,
+    qty_delivered: GridCellValue,
+  ): boolean {
+    const commit = rows.filter(commitItem => commitItem.id === id);
+    if (Number(qty_delivered) <= commit[0].qty && Number(qty_delivered) >= 0) {
+      return true;
+    }
+    return false;
+  }
+
+  const handleEditRowsModelChange = useCallback(
+    (newModel: GridEditRowsModel) => {
+      const updatedModel = { ...newModel };
+      Object.keys(updatedModel).forEach(id => {
+        if (updatedModel[id].qty_delivered) {
+          const isValid = validateBalance(
+            id,
+            updatedModel[id].qty_delivered.value,
+          );
+          updatedModel[id].qty_delivered = {
+            ...updatedModel[id].qty_delivered,
+            error: !isValid,
+          };
+        }
+      });
+      setEditRowsModel(updatedModel);
+    },
+    [validateBalance],
+  );
 
   function getBalance(params: GridValueGetterParams): number {
     const qtyValue = params.getValue(params.id, 'qty') || 0;
@@ -65,6 +110,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   const columns = [
     { field: 'part_number', headerName: 'CÓDIGO', width: 140 },
     { field: 'description', headerName: 'DESCRIÇÃO', width: 500 },
+    { field: 'qty', headerName: 'QTD', width: 150 },
     {
       field: 'qty_delivered',
       headerName: 'QTD ENTREGUE',
@@ -72,12 +118,11 @@ const PrintModal: React.FC<CommitsModalProps> = ({
       type: 'number',
       editable: true,
     },
-    { field: 'qty', headerName: 'QTD', width: 150 },
     {
-      field: 'fullName',
+      field: 'balance',
       headerName: 'Saldo',
       width: 160,
-      editable: true,
+      editable: false,
       valueGetter: getBalance,
       sortComparator: (v1: any, v2: any) =>
         v1?.toString().localeCompare(v2?.toString()),
@@ -133,13 +178,14 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           <div style={{ display: 'flex', height: 350 }}>
             <div style={{ flexGrow: 1 }}>
               <DataGrid
+                className={classes.root}
                 rows={rows}
                 columns={columns}
                 checkboxSelection
                 disableSelectionOnClick
                 isCellEditable={params =>
-                  // eslint-disable-next-line prettier/prettier
-                  selectionModel.includes(params.row.id)}
+                  selectionModel.includes(params.row.id)
+                }
                 onSelectionModelChange={newSelection => {
                   setSelectionModel(newSelection);
                   const newSelectionData = rows.filter(row =>
@@ -150,6 +196,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                 selectionModel={selectionModel}
                 onCellEditCommit={handleEditCellChangeCommitted}
                 onCellEditStart={() => setButtonDisable(true)}
+                onEditRowsModelChange={handleEditRowsModelChange}
               />
             </div>
           </div>
