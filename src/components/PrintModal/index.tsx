@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Modal, Overlay, Tooltip } from 'react-bootstrap';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 import { makeStyles } from '@material-ui/styles';
 import {
   DataGrid,
@@ -62,16 +63,19 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     handleClose();
   }
 
-  function validateBalance(
-    id: GridCellValue,
-    qty_delivered: GridCellValue,
-  ): boolean {
-    const commit = rows.filter(commitItem => commitItem.id === id);
-    if (Number(qty_delivered) <= commit[0].qty && Number(qty_delivered) >= 0) {
-      return true;
-    }
-    return false;
-  }
+  const validateBalance = useCallback(
+    (id: GridCellValue, qty_delivered: GridCellValue): boolean => {
+      const commit = rows.filter(commitItem => commitItem.id === id);
+      if (
+        Number(qty_delivered) <= commit[0].qty &&
+        Number(qty_delivered) >= 0
+      ) {
+        return true;
+      }
+      return false;
+    },
+    [rows],
+  );
 
   const handleEditRowsModelChange = useCallback(
     (newModel: GridEditRowsModel) => {
@@ -96,16 +100,14 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   function getBalance(params: GridValueGetterParams): number {
     const qtyValue = params.getValue(params.id, 'qty') || 0;
     const qtyDeliveredValue = params.getValue(params.id, 'qty_delivered') || 0;
+    const balance: number = Number(qtyValue) - Number(qtyDeliveredValue);
 
-    return Number(qtyValue) - Number(qtyDeliveredValue);
+    return Number(balance.toFixed(2));
   }
 
   useEffect(() => {
     setRows(commitsData);
   }, [commitsData]);
-
-  const [show, setShow] = useState(false);
-  const target = useRef(null);
 
   const columns = [
     { field: 'part_number', headerName: 'CÓDIGO', width: 140 },
@@ -135,7 +137,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     (props: GridCellEditCommitParams) => {
       if (props.field === 'qty_delivered') {
         const qty_delivered = props.value;
-        // if(value > saldo)
         const updatedRows = rows.map(row => {
           if (row.id === props.id) {
             return {
@@ -183,8 +184,9 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                 columns={columns}
                 checkboxSelection
                 disableSelectionOnClick
-                isCellEditable={params =>
-                  selectionModel.includes(params.row.id)
+                isCellEditable={
+                  params => selectionModel.includes(params.row.id)
+                  // eslint-disable-next-line react/jsx-curly-newline
                 }
                 onSelectionModelChange={newSelection => {
                   setSelectionModel(newSelection);
@@ -207,7 +209,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           </Button>
           <Button
             disabled={buttonDisable}
-            ref={target}
             variant="warning"
             onClick={() => {
               handleClickUpdateDeliveryQuantities();
@@ -216,13 +217,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           >
             Salvar
           </Button>
-          <Overlay target={target.current} show={show} placement="top">
-            {props => (
-              <Tooltip id="button-tooltip" {...props}>
-                Copiado para a área de transferência!
-              </Tooltip>
-            )}
-          </Overlay>
         </Modal.Footer>
       </Modal>
     </Cont>
