@@ -186,7 +186,7 @@ const Usinagem: React.FC = () => {
 
   return (
     <>
-      <Header  />
+      <Header />
 
       <Modal
         style={{ color: 'black' }}

@@ -1,7 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Modal } from 'react-bootstrap';
+import { mutate } from 'swr';
+import FileSaver from 'file-saver';
 import { makeStyles } from '@material-ui/styles';
+import { FormHandles } from '@unform/core';
 import {
   DataGrid,
   GridCellEditCommitParams,
@@ -10,8 +12,13 @@ import {
   GridRowId,
   GridValueGetterParams,
 } from '@material-ui/data-grid';
+import * as Yup from 'yup';
+import { useToast } from '../../hooks/toast';
+import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
 import { Container as Cont } from './styles';
+import generateTxtData from '../../utils/generateTxtData';
+import { Data } from '../../pages/Almoxarifado';
 
 type Commit = {
   created_at: string;
@@ -30,6 +37,7 @@ type CommitsModalProps = {
   isOpen: boolean;
   handleClose(): void;
   commitsData: Commit[];
+  data: Data[];
 };
 
 const h1Style = {
@@ -40,8 +48,11 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   isOpen,
   handleClose,
   commitsData,
+  data,
 }) => {
   const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);
+  const formSaveRef = useRef<FormHandles>(null);
+  const { addToast } = useToast();
   const [rows, setRows] = useState<Commit[]>([]);
   const [dataSelectionModel, setDataSelectionModel] = useState<Commit[]>([]);
   const [buttonDisable, setButtonDisable] = useState(false);
@@ -57,6 +68,13 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     };
   });
   const classes = useStyles();
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const hours = String(today.getHours());
+  const minutes = String(today.getMinutes());
+
+  const completeDate = `Relatório de quantidade entregue - ${dd}_${mm} às ${hours} horas e ${minutes} minutos.txt`;
 
   function handlePreClose(): void {
     setSelectionModel([]);
@@ -116,13 +134,13 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     {
       field: 'qty_delivered',
       headerName: 'QTD ENTREGUE',
-      width: 150,
+      width: 200,
       type: 'number',
       editable: true,
     },
     {
       field: 'balance',
-      headerName: 'Saldo',
+      headerName: 'SALDO',
       width: 160,
       editable: false,
       valueGetter: getBalance,
@@ -156,16 +174,96 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     },
     [rows, selectionModel],
   );
+  const commitsQtyID = dataSelectionModel.map(commit => ({
+    commit_id: commit.id,
+    qty_delivered: commit.qty_delivered,
+  }));
+
+  const deliveredBalance = dataSelectionModel.reduce(
+    (acc, commit) => {
+      if (commit.qty === commit.qty_delivered) {
+        acc.entregue += 1;
+        return acc;
+      }
+
+      if (commit.qty_delivered === 0) {
+        acc.pedente += 1;
+        return acc;
+      }
+
+      acc.parcial += 1;
+      return acc;
+    },
+    {
+      pedente: 0,
+      parcial: 0,
+      entregue: 0,
+    },
+  );
 
   const handleClickUpdateDeliveryQuantities = async (): Promise<void> => {
-    await Promise.all(
-      dataSelectionModel.map(async commit => {
-        await api.put(`/commits/${commit.id}`, {
-          qty_delivered: commit.qty_delivered,
-        });
-      }),
-    );
+    try {
+      await api.put(`/commits/`, {
+        commitsUpdated: commitsQtyID,
+      });
+
+      const newData = data?.map((commitSelected: Data) => {
+        if (commitSelected.id === dataSelectionModel[0].op_id) {
+          if (
+            deliveredBalance.parcial === 0 &&
+            deliveredBalance.pedente === 0
+          ) {
+            return {
+              ...commitSelected,
+              status: 'Entregue',
+              updated_at: new Date().toISOString(),
+            };
+          }
+          if (deliveredBalance.parcial >= 1 || deliveredBalance.entregue >= 1) {
+            return {
+              ...commitSelected,
+              status: 'Entregue parcialmente',
+              updated_at: new Date().toISOString(),
+            };
+          }
+          return {
+            ...commitSelected,
+            status: 'Entregua pendente',
+            updated_at: new Date().toISOString(),
+          };
+        }
+        return commitSelected;
+      });
+      mutate('ops', newData, false);
+      handlePreClose();
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        formSaveRef.current?.setErrors(errors);
+        return;
+      }
+
+      addToast({
+        type: 'error',
+        title: 'Erro na atualização do empenho. ',
+        description: 'Ocorreu algo errado. Tente novamente.',
+      });
+    }
+    const textData: string = generateTxtData(
+      commitsData,
+      dataSelectionModel,
+    ).join('\n');
+    const blob = new Blob([textData], {
+      type: 'text/plain;charset=utf-8',
+    });
+    FileSaver.saveAs(blob, `${completeDate}`);
   };
+
+  // const myJsonString = JSON.stringify(textData);
+  // const blob = new Blob([myJsonString], {
+  //   type: 'application/vnd.ms-excel;charset=utf-8',
+  // });
+  // FileSaver.saveAs(blob, 'Report.xlsx');
 
   return (
     <Cont>
@@ -212,7 +310,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
             variant="warning"
             onClick={() => {
               handleClickUpdateDeliveryQuantities();
-              handlePreClose();
             }}
           >
             Salvar
@@ -222,5 +319,4 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     </Cont>
   );
 };
-
 export default PrintModal;

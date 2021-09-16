@@ -35,7 +35,7 @@ export interface SaveData {
 }
 
 const Almoxarifado: React.FC = () => {
-  const { data, mutate } = useFetch<Data[]>('ops', {}, 6000);
+  const { data, mutate } = useFetch<Data[]>('ops', {}, 60000);
   const { user } = useAuth();
   const [showSave, setShowSave] = useState(false);
   const [showExclude, setShowExclude] = useState(false);
@@ -101,15 +101,15 @@ const Almoxarifado: React.FC = () => {
         status: opStatus,
       });
 
-      const newData = data?.map((opSelected: Data) => {
-        if (opSelected.id === op.id) {
+      const newData = data?.map((opItem: Data) => {
+        if (opItem.id === op.id) {
           return {
-            ...opSelected,
+            ...opItem,
             status: opStatus,
             updated_at: new Date().toISOString(),
           };
         }
-        return opSelected;
+        return opItem;
       });
 
       mutate(newData, false);
@@ -245,6 +245,7 @@ const Almoxarifado: React.FC = () => {
           isOpen={showCommitsModal}
           handleClose={handleClose}
           commitsData={dataCommits}
+          data={data}
         />
       </Cont>
       <Modal
