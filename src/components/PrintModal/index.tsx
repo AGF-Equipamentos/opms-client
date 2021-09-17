@@ -18,6 +18,7 @@ import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
 import { Container as Cont } from './styles';
 import generateTxtData from '../../utils/generateTxtData';
+import validadeCreationOfTXtFile from '../../utils/validadeCreationOfTXtFile';
 import { Data } from '../../pages/Almoxarifado';
 
 type Commit = {
@@ -78,6 +79,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
 
   function handlePreClose(): void {
     setSelectionModel([]);
+    setDataSelectionModel([]);
     handleClose();
   }
 
@@ -202,61 +204,78 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   );
 
   const handleClickUpdateDeliveryQuantities = async (): Promise<void> => {
-    try {
-      await api.put(`/commits/`, {
-        commitsUpdated: commitsQtyID,
-      });
-
-      const newData = data?.map((commitSelected: Data) => {
-        if (commitSelected.id === dataSelectionModel[0].op_id) {
-          if (
-            deliveredBalance.parcial === 0 &&
-            deliveredBalance.pedente === 0
-          ) {
-            return {
-              ...commitSelected,
-              status: 'Entregue',
-              updated_at: new Date().toISOString(),
-            };
-          }
-          if (deliveredBalance.parcial >= 1 || deliveredBalance.entregue >= 1) {
-            return {
-              ...commitSelected,
-              status: 'Entregue parcialmente',
-              updated_at: new Date().toISOString(),
-            };
-          }
-          return {
-            ...commitSelected,
-            status: 'Entregua pendente',
-            updated_at: new Date().toISOString(),
-          };
-        }
-        return commitSelected;
-      });
-      mutate('ops', newData, false);
-      handlePreClose();
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
-        formSaveRef.current?.setErrors(errors);
-        return;
-      }
-
+    const txtValidation = validadeCreationOfTXtFile(
+      commitsData,
+      dataSelectionModel,
+    ).some((commit: number) => commit <= 0);
+    if (txtValidation || dataSelectionModel.length === 0) {
       addToast({
         type: 'error',
         title: 'Erro na atualização do empenho. ',
-        description: 'Ocorreu algo errado. Tente novamente.',
+        description:
+          'Ocorreu algo errado. Verifique a quantidade entregue e tente novamente.',
       });
+    } else {
+      try {
+        await api.put(`/commits/`, {
+          commitsUpdated: commitsQtyID,
+        });
+
+        const newData = data?.map((commitSelected: Data) => {
+          if (commitSelected.id === dataSelectionModel[0].op_id) {
+            if (
+              deliveredBalance.parcial === 0 &&
+              deliveredBalance.pedente === 0
+            ) {
+              return {
+                ...commitSelected,
+                status: 'Entregue',
+                updated_at: new Date().toISOString(),
+              };
+            }
+            if (
+              deliveredBalance.parcial >= 1 ||
+              deliveredBalance.entregue >= 1
+            ) {
+              return {
+                ...commitSelected,
+                status: 'Entregue parcialmente',
+                updated_at: new Date().toISOString(),
+              };
+            }
+            return {
+              ...commitSelected,
+              status: 'Entregua pendente',
+              updated_at: new Date().toISOString(),
+            };
+          }
+          return commitSelected;
+        });
+        mutate('ops', newData, false);
+        handlePreClose();
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formSaveRef.current?.setErrors(errors);
+          return;
+        }
+
+        addToast({
+          type: 'error',
+          title: 'Erro na atualização do empenho. ',
+          description: 'Ocorreu algo errado. Tente novamente.',
+        });
+      }
+      const textData: string = generateTxtData(
+        commitsData,
+        dataSelectionModel,
+      ).join('\n');
+
+      const blob = new Blob([textData], {
+        type: 'text/plain;charset=utf-8',
+      });
+      FileSaver.saveAs(blob, `${completeDate}`);
     }
-    const textData: string = generateTxtData(
-      commitsData,
-      dataSelectionModel,
-    ).join('\n');
-    const blob = new Blob([textData], {
-      type: 'text/plain;charset=utf-8',
-    });
-    FileSaver.saveAs(blob, `${completeDate}`);
   };
 
   // const myJsonString = JSON.stringify(textData);
@@ -310,6 +329,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
             variant="warning"
             onClick={() => {
               handleClickUpdateDeliveryQuantities();
+              autoDismiss(): false;
             }}
           >
             Salvar
