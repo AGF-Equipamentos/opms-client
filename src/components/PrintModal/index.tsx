@@ -18,8 +18,10 @@ import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
 import { Container as Cont } from './styles';
 import generateTxtData from '../../utils/generateTxtData';
+import generateXlsxData from '../../utils/generateXlsxData';
 import validadeCreationOfTXtFile from '../../utils/validadeCreationOfTXtFile';
 import { Data } from '../../pages/Almoxarifado';
+import exportToSpreadsheet from '../../utils/exportToSpreadsheet ';
 
 type Commit = {
   created_at: string;
@@ -266,23 +268,28 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           description: 'Ocorreu algo errado. Tente novamente.',
         });
       }
-      const textData: string = generateTxtData(
+      const textData: string[] = generateTxtData(
         commitsData,
         dataSelectionModel,
-      ).join('\n');
-
-      const blob = new Blob([textData], {
+      );
+      const xlsxData = generateXlsxData(commitsData);
+      const namesArray = [
+        'CÓDIGO',
+        'DESCRIÇÃO',
+        'QTD',
+        'QTD ENTREGUE',
+        'SALDO',
+        'LOCAÇÃO',
+        'ARMAZEM',
+      ];
+      xlsxData.unshift(namesArray);
+      const blobTxt = new Blob([String(textData)], {
         type: 'text/plain;charset=utf-8',
       });
-      FileSaver.saveAs(blob, `${completeDate}`);
+      exportToSpreadsheet(xlsxData, 'teste');
+      FileSaver.saveAs(blobTxt, `${completeDate}`);
     }
   };
-
-  // const myJsonString = JSON.stringify(textData);
-  // const blob = new Blob([myJsonString], {
-  //   type: 'application/vnd.ms-excel;charset=utf-8',
-  // });
-  // FileSaver.saveAs(blob, 'Report.xlsx');
 
   return (
     <Cont>
@@ -329,11 +336,11 @@ const PrintModal: React.FC<CommitsModalProps> = ({
             variant="warning"
             onClick={() => {
               handleClickUpdateDeliveryQuantities();
-              autoDismiss(): false;
             }}
           >
             Salvar
           </Button>
+          ;
         </Modal.Footer>
       </Modal>
     </Cont>

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiEdit, FiX, FiCheckSquare } from 'react-icons/fi';
+import { FiEdit, FiX, FiCheckSquare, FiDownload } from 'react-icons/fi';
 import { Table, Container, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
@@ -421,6 +421,13 @@ const Almoxarifado: React.FC = () => {
                         style={{ color: 'white', padding: 0 }}
                       >
                         <FiCheckSquare />
+                      </Button>
+                      <Button
+                        variant="link"
+                        onClick={() => handleExcludeID(opItem)}
+                        style={{ color: 'white', padding: 0 }}
+                      >
+                        <FiDownload />
                       </Button>
                       <Button
                         variant="link"
