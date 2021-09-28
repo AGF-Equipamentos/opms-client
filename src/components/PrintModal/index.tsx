@@ -18,10 +18,8 @@ import getValidationErrors from '../../utils/getValidationErrors';
 import api from '../../services/api';
 import { Container as Cont } from './styles';
 import generateTxtData from '../../utils/generateTxtData';
-import generateXlsxData from '../../utils/generateXlsxData';
 import validadeCreationOfTXtFile from '../../utils/validadeCreationOfTXtFile';
 import { Data } from '../../pages/Almoxarifado';
-import exportToSpreadsheet from '../../utils/exportToSpreadsheet ';
 
 type Commit = {
   created_at: string;
@@ -77,7 +75,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   const hours = String(today.getHours());
   const minutes = String(today.getMinutes());
 
-  const completeDate = `Relatório de quantidade entregue - ${dd}_${mm} às ${hours} horas e ${minutes} minutos.txt`;
+  const completeDate = `Relatório de qtd entregue - ${dd}.${mm} - as ${hours}.${minutes}.txt`;
 
   function handlePreClose(): void {
     setSelectionModel([]);
@@ -183,7 +181,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     qty_delivered: commit.qty_delivered,
   }));
 
-  const deliveredBalance = dataSelectionModel.reduce(
+  const deliveredBalance = rows.reduce(
     (acc, commit) => {
       if (commit.qty === commit.qty_delivered) {
         acc.entregue += 1;
@@ -227,7 +225,8 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           if (commitSelected.id === dataSelectionModel[0].op_id) {
             if (
               deliveredBalance.parcial === 0 &&
-              deliveredBalance.pedente === 0
+              deliveredBalance.pedente === 0 &&
+              deliveredBalance.entregue === commitsData.length
             ) {
               return {
                 ...commitSelected,
@@ -272,21 +271,9 @@ const PrintModal: React.FC<CommitsModalProps> = ({
         commitsData,
         dataSelectionModel,
       );
-      const xlsxData = generateXlsxData(commitsData);
-      const namesArray = [
-        'CÓDIGO',
-        'DESCRIÇÃO',
-        'QTD',
-        'QTD ENTREGUE',
-        'SALDO',
-        'LOCAÇÃO',
-        'ARMAZEM',
-      ];
-      xlsxData.unshift(namesArray);
-      const blobTxt = new Blob([String(textData)], {
+      const blobTxt = new Blob([String(textData.join('\n'))], {
         type: 'text/plain;charset=utf-8',
       });
-      exportToSpreadsheet(xlsxData, 'teste');
       FileSaver.saveAs(blobTxt, `${completeDate}`);
     }
   };
@@ -296,7 +283,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
       <Modal size="xl" show={isOpen} onHide={handlePreClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            <h1 style={h1Style}>Lista de empenhos</h1>
+            <h1 style={h1Style}>Tabela de empenhos</h1>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

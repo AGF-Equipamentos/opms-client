@@ -12,6 +12,7 @@ import { useFetch } from '../../hooks/useFetch';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
+import exportCommitsToExcel from '../../utils/exportCommitsToExcel';
 import api from '../../services/api';
 import PrintModal from '../../components/PrintModal';
 import { Container as Cont } from '../../components/PrintModal/styles';
@@ -46,6 +47,7 @@ const Almoxarifado: React.FC = () => {
   const [opStatus, setOpStatus] = useState('Entrega pendente');
   const { addToast } = useToast();
   const [showCommitsModal, setShowCommitsModal] = useState(false);
+  const [showExcelDownloadModal, setShowExcelDownloadModal] = useState(false);
   const [dataCommits, setDataCommits] = useState([]);
 
   const handleClose = (): void => {
@@ -60,6 +62,11 @@ const Almoxarifado: React.FC = () => {
   const handleExcludeID = useCallback(opSelected => {
     setOp(opSelected);
     setShowExclude(true);
+  }, []);
+
+  const handleExcel = useCallback(opSelected => {
+    setOp(opSelected);
+    setShowExcelDownloadModal(true);
   }, []);
 
   const handleID = useCallback(opSelected => {
@@ -94,6 +101,32 @@ const Almoxarifado: React.FC = () => {
       });
     }
   }, [addToast, data, mutate, op.id]);
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const handleClickButtonDowloadExcel = useCallback(async () => {
+    try {
+      const response = await api.get(`/commits/${op.id}`);
+      setDataCommits(response.data);
+      exportCommitsToExcel(
+        response.data,
+        `${op.op_number} - ${op.part_number} - ${dd}.${mm}`,
+      );
+      setShowExcelDownloadModal(false);
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        formSaveRef.current?.setErrors(errors);
+        return;
+      }
+
+      addToast({
+        type: 'error',
+        title: 'Erro ao fazer Download',
+        description: 'ocorreu algo errado, tente novamente.',
+      });
+    }
+  }, [addToast, op.id]);
 
   const handleSaveSubmit = useCallback(async () => {
     try {
@@ -343,6 +376,30 @@ const Almoxarifado: React.FC = () => {
           </Modal.Footer>
         </FormUnform>
       </Modal>
+      {/* Excel modal */}
+      <Modal
+        style={{ color: 'black' }}
+        show={showExcelDownloadModal}
+        onHide={() => setShowExcelDownloadModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Fazer download da tabela de empenhos?</Modal.Title>
+        </Modal.Header>
+        <FormUnform onSubmit={handleClickButtonDowloadExcel}>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowExcelDownloadModal(false)}
+            >
+              Cancelar
+            </Button>
+            <Button variant="success" type="submit">
+              Fazer download
+            </Button>
+          </Modal.Footer>
+        </FormUnform>
+      </Modal>
+      {/* Excel modal */}
       <Container>
         <Button
           variant="outline-warning"
@@ -424,7 +481,7 @@ const Almoxarifado: React.FC = () => {
                       </Button>
                       <Button
                         variant="link"
-                        onClick={() => handleExcludeID(opItem)}
+                        onClick={() => handleExcel(opItem)}
                         style={{ color: 'white', padding: 0 }}
                       >
                         <FiDownload />
