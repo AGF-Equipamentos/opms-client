@@ -19,7 +19,7 @@ import api from '../../services/api';
 import { Container as Cont } from './styles';
 import generateTxtData from '../../utils/generateTxtData';
 import validadeCreationOfTXtFile from '../../utils/validadeCreationOfTXtFile';
-import { Data } from '../../pages/Almoxarifado';
+import { Data } from '../Main';
 
 type Commit = {
   created_at: string;
@@ -75,7 +75,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   const hours = String(today.getHours());
   const minutes = String(today.getMinutes());
 
-  const completeDate = `Relatório de qtd entregue - ${dd}.${mm} - as ${hours}.${minutes}.txt`;
+  const completeDate = `Relatório de qtd entregue - ${dd}.${mm} as ${hours}.${minutes}.txt`;
 
   function handlePreClose(): void {
     setSelectionModel([]);
@@ -280,7 +280,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
 
   return (
     <Cont>
-      <Modal size="xl" show={isOpen} onHide={handlePreClose}>
+      <Modal size="xl" show={isOpen} onHide={handlePreClose} bsClass="my-modal">
         <Modal.Header closeButton>
           <Modal.Title>
             <h1 style={h1Style}>Tabela de empenhos</h1>
