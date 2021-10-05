@@ -39,6 +39,8 @@ type CommitsModalProps = {
   handleClose(): void;
   commitsData: Commit[];
   data: Data[];
+  op_number: string;
+  op_part_number: string;
 };
 
 const h1Style = {
@@ -50,6 +52,8 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   handleClose,
   commitsData,
   data,
+  op_number,
+  op_part_number,
 }) => {
   const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);
   const formSaveRef = useRef<FormHandles>(null);
@@ -74,8 +78,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const hours = String(today.getHours());
   const minutes = String(today.getMinutes());
-
-  const completeDate = `Relatório de qtd entregue - ${dd}.${mm} as ${hours}.${minutes}.txt`;
 
   function handlePreClose(): void {
     setSelectionModel([]);
@@ -146,6 +148,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
       width: 160,
       editable: false,
       valueGetter: getBalance,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sortComparator: (v1: any, v2: any) =>
         v1?.toString().localeCompare(v2?.toString()),
     },
@@ -267,6 +270,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           description: 'Ocorreu algo errado. Tente novamente.',
         });
       }
+      const completeDate = `${op_part_number} (${op_number}) ${dd}.${mm} as ${hours}.${minutes}.txt`;
       const textData: string[] = generateTxtData(
         commitsData,
         dataSelectionModel,

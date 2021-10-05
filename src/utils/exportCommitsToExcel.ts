@@ -34,7 +34,10 @@ export default function exportToSpreadSheet(
       `${commit.description}`,
       `${commit.qty}`,
       `${commit.qty_delivered}`,
-      `${(commit.qty - commit.qty_delivered).toFixed(2)}`,
+      `${(commit.qty - commit.qty_delivered)
+        .toFixed(2)
+        .toString()
+        .replace('.', ',')}`,
       `${commit.location}`,
       `${commit.warehouse}`,
     ];

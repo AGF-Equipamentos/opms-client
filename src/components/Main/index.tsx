@@ -202,6 +202,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
   const handleClickButtonShowCommitsModal = useCallback(async opItem => {
     const response = await api.get(`/commits/${opItem.id}`);
     setDataCommits(response.data);
+    setOp(opItem);
     setShowCommitsModal(true);
   }, []);
 
@@ -288,6 +289,8 @@ const Main: React.FC<MainProps> = ({ department }) => {
           handleClose={handleClose}
           commitsData={dataCommits}
           data={data}
+          op_part_number={op.part_number}
+          op_number={op.op_number}
         />
       </Cont>
       <Modal
