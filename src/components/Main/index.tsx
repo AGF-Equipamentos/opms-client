@@ -291,6 +291,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
           data={data}
           op_part_number={op.part_number}
           op_number={op.op_number}
+          department={department}
         />
       </Cont>
       <Modal

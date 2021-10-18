@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { mutate } from 'swr';
@@ -41,6 +42,7 @@ type CommitsModalProps = {
   data: Data[];
   op_number: string;
   op_part_number: string;
+  department: string;
 };
 
 const h1Style = {
@@ -54,6 +56,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
   data,
   op_number,
   op_part_number,
+  department,
 }) => {
   const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);
   const formSaveRef = useRef<FormHandles>(null);
@@ -184,6 +187,17 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     qty_delivered: commit.qty_delivered,
   }));
 
+  const changeQtyDeliveredToBalance = (selectedCommits: Commit[]) => {
+    const settedCommits = selectedCommits.map(commit => {
+      const commitUpdated = {
+        ...commit,
+        qty_delivered: commit.qty,
+      };
+      return commitUpdated;
+    });
+    setRows(settedCommits);
+  };
+
   const deliveredBalance = rows.reduce(
     (acc, commit) => {
       if (commit.qty === commit.qty_delivered) {
@@ -255,7 +269,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           }
           return commitSelected;
         });
-        mutate('ops', newData, false);
+        mutate(`ops?department=${department}`, newData, false);
         handlePreClose();
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -309,6 +323,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                     newSelection.includes(row.id),
                   );
                   setDataSelectionModel(newSelectionData);
+                  // changeQtyDeliveredToBalance(newSelectionData);
                 }}
                 selectionModel={selectionModel}
                 onCellEditCommit={handleEditCellChangeCommitted}
