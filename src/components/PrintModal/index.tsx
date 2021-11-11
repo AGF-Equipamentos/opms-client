@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-curly-newline */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Modal } from 'react-bootstrap';
@@ -12,6 +13,7 @@ import {
   GridEditRowsModel,
   GridRowId,
   GridValueGetterParams,
+  GridRowParams,
 } from '@material-ui/data-grid';
 import * as Yup from 'yup';
 import { useToast } from '../../hooks/toast';
@@ -187,17 +189,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     qty_delivered: commit.qty_delivered,
   }));
 
-  const changeQtyDeliveredToBalance = (selectedCommits: Commit[]) => {
-    const settedCommits = selectedCommits.map(commit => {
-      const commitUpdated = {
-        ...commit,
-        qty_delivered: commit.qty,
-      };
-      return commitUpdated;
-    });
-    setRows(settedCommits);
-  };
-
   const deliveredBalance = rows.reduce(
     (acc, commit) => {
       if (commit.qty === commit.qty_delivered) {
@@ -316,6 +307,11 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                 isCellEditable={
                   params => selectionModel.includes(params.row.id)
                   // eslint-disable-next-line react/jsx-curly-newline
+                }
+                isRowSelectable={(commit: GridRowParams) =>
+                  commit.row.qty !==
+                  commitsData.find(oldCommit => oldCommit.id === commit.id)
+                    ?.qty_delivered
                 }
                 onSelectionModelChange={newSelection => {
                   setSelectionModel(newSelection);
