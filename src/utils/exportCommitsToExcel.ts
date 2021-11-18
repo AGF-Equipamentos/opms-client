@@ -32,8 +32,8 @@ export default function exportToSpreadSheet(
     return [
       `${commit.part_number}`,
       `${commit.description}`,
-      `${commit.qty}`,
-      `${commit.qty_delivered}`,
+      `${commit.qty.toString().replace('.', ',')}`,
+      `${commit.qty_delivered.toString().replace('.', ',')}`,
       `${(commit.qty - commit.qty_delivered)
         .toFixed(2)
         .toString()

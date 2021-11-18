@@ -1,5 +1,4 @@
 /* eslint-disable react/jsx-curly-newline */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { mutate } from 'swr';
@@ -189,6 +188,27 @@ const PrintModal: React.FC<CommitsModalProps> = ({
     qty_delivered: commit.qty_delivered,
   }));
 
+  const changeQtyDeliveredToBalance = useCallback(
+    (selectedCommits: Commit[]): void => {
+      const newSelectionData = selectedCommits.map(commit => ({
+        ...commit,
+        qty_delivered: commit.qty,
+      }));
+      const completeSelectionData = commitsData.map(commit => {
+        const findedCommit = newSelectionData.find(
+          oldCommit => oldCommit.id === commit.id,
+        );
+        if (findedCommit !== undefined) {
+          return findedCommit;
+        }
+        return commit;
+      });
+      setDataSelectionModel(newSelectionData);
+      setRows(completeSelectionData);
+    },
+    [commitsData],
+  );
+
   const deliveredBalance = rows.reduce(
     (acc, commit) => {
       if (commit.qty === commit.qty_delivered) {
@@ -239,7 +259,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
               return {
                 ...commitSelected,
                 status: 'Entregue',
-                updated_at: new Date().toISOString(),
+                updated_at: today.toISOString(),
               };
             }
             if (
@@ -249,13 +269,13 @@ const PrintModal: React.FC<CommitsModalProps> = ({
               return {
                 ...commitSelected,
                 status: 'Entregue parcialmente',
-                updated_at: new Date().toISOString(),
+                updated_at: today.toISOString(),
               };
             }
             return {
               ...commitSelected,
               status: 'Entregua pendente',
-              updated_at: new Date().toISOString(),
+              updated_at: today.toISOString(),
             };
           }
           return commitSelected;
@@ -275,12 +295,12 @@ const PrintModal: React.FC<CommitsModalProps> = ({
           description: 'Ocorreu algo errado. Tente novamente.',
         });
       }
-      const completeDate = `${op_part_number} (${op_number}) ${dd}.${mm} as ${hours}.${minutes}.txt`;
+      const completeDate = `${op_part_number} (${op_number}) ${dd}.${mm} às ${hours}.${minutes}.txt`;
       const textData: string[] = generateTxtData(
         commitsData,
         dataSelectionModel,
       );
-      const blobTxt = new Blob([String(textData.join('\n'))], {
+      const blobTxt = new Blob([textData.join('\n')], {
         type: 'text/plain;charset=utf-8',
       });
       FileSaver.saveAs(blobTxt, `${completeDate}`);
@@ -319,7 +339,8 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                     newSelection.includes(row.id),
                   );
                   setDataSelectionModel(newSelectionData);
-                  // changeQtyDeliveredToBalance(newSelectionData);
+
+                  changeQtyDeliveredToBalance(newSelectionData);
                 }}
                 selectionModel={selectionModel}
                 onCellEditCommit={handleEditCellChangeCommitted}
