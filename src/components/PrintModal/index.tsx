@@ -190,10 +190,19 @@ const PrintModal: React.FC<CommitsModalProps> = ({
 
   const changeQtyDeliveredToBalance = useCallback(
     (selectedCommits: Commit[]): void => {
-      const newSelectionData = selectedCommits.map(commit => ({
-        ...commit,
-        qty_delivered: commit.qty,
-      }));
+      const newSelectionData = selectedCommits.map(commit => {
+        const commitFilter = commitsData.find(
+          commitData => commitData.id === commit.id,
+        );
+        if (commitFilter?.qty_delivered !== commit.qty_delivered) {
+          return commit;
+        }
+        const updateCommit = {
+          ...commit,
+          qty_delivered: commit.qty,
+        };
+        return updateCommit;
+      });
       const completeSelectionData = commitsData.map(commit => {
         const findedCommit = newSelectionData.find(
           oldCommit => oldCommit.id === commit.id,
@@ -291,7 +300,7 @@ const PrintModal: React.FC<CommitsModalProps> = ({
 
         addToast({
           type: 'error',
-          title: 'Erro na atualização do empenho. ',
+          title: 'Erro na atualização do empenho.',
           description: 'Ocorreu algo errado. Tente novamente.',
         });
       }
@@ -338,7 +347,6 @@ const PrintModal: React.FC<CommitsModalProps> = ({
                   const newSelectionData = rows.filter(row =>
                     newSelection.includes(row.id),
                   );
-                  setDataSelectionModel(newSelectionData);
 
                   changeQtyDeliveredToBalance(newSelectionData);
                 }}
