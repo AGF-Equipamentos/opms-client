@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { FiEdit, FiX } from 'react-icons/fi';
+import { FiEdit, FiX, FiCheckSquare, FiDownload } from 'react-icons/fi';
 import { Table, Container, Badge, Modal, Button, Form } from 'react-bootstrap';
 import { Form as FormUnform } from '@unform/web';
 import { FormHandles } from '@unform/core';
@@ -12,7 +12,10 @@ import { useFetch } from '../../hooks/useFetch';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 import getValidationErrors from '../../utils/getValidationErrors';
+import exportCommitsToExcel from '../../utils/exportCommitsToExcel';
 import api from '../../services/api';
+import PrintModal from '../PrintModal';
+import { Container as Cont } from '../PrintModal/styles';
 
 export interface Data {
   id: string;
@@ -36,12 +39,11 @@ type MainProps = {
   department: string;
 };
 
-const Main: React.FC<MainProps> = department => {
-  console.log(department);
+const Main: React.FC<MainProps> = ({ department }) => {
   const { data, mutate } = useFetch<Data[]>(
     `ops?department=${department}`,
     {},
-    6000,
+    60000,
   );
   const { user } = useAuth();
   const [showSave, setShowSave] = useState(false);
@@ -52,6 +54,13 @@ const Main: React.FC<MainProps> = department => {
   const [opNumber, setOpNumber] = useState('');
   const [opStatus, setOpStatus] = useState('Entrega pendente');
   const { addToast } = useToast();
+  const [showCommitsModal, setShowCommitsModal] = useState(false);
+  const [showExcelDownloadModal, setShowExcelDownloadModal] = useState(false);
+  const [dataCommits, setDataCommits] = useState([]);
+
+  const handleClose = (): void => {
+    setShowCommitsModal(false);
+  };
 
   const handleNewOp = useCallback(() => {
     setOpStatus('Entrega pendente');
@@ -61,6 +70,11 @@ const Main: React.FC<MainProps> = department => {
   const handleExcludeID = useCallback(opSelected => {
     setOp(opSelected);
     setShowExclude(true);
+  }, []);
+
+  const handleExcel = useCallback(opSelected => {
+    setOp(opSelected);
+    setShowExcelDownloadModal(true);
   }, []);
 
   const handleID = useCallback(opSelected => {
@@ -95,6 +109,32 @@ const Main: React.FC<MainProps> = department => {
       });
     }
   }, [addToast, data, mutate, op.id]);
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const handleClickButtonDowloadExcel = useCallback(async () => {
+    try {
+      const response = await api.get(`/commits/${op.id}`);
+      setDataCommits(response.data);
+      exportCommitsToExcel(
+        response.data,
+        `${op.op_number} - ${op.part_number} - ${dd}.${mm}`,
+      );
+      setShowExcelDownloadModal(false);
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        formSaveRef.current?.setErrors(errors);
+        return;
+      }
+
+      addToast({
+        type: 'error',
+        title: 'Erro ao fazer Download',
+        description: 'ocorreu algo errado, tente novamente.',
+      });
+    }
+  }, [addToast, dd, mm, op.id, op.op_number, op.part_number]);
 
   const handleSaveSubmit = useCallback(async () => {
     try {
@@ -102,15 +142,15 @@ const Main: React.FC<MainProps> = department => {
         status: opStatus,
       });
 
-      const newData = data?.map((opSelected: Data) => {
-        if (opSelected.id === op.id) {
+      const newData = data?.map((opItem: Data) => {
+        if (opItem.id === op.id) {
           return {
-            ...opSelected,
+            ...opItem,
             status: opStatus,
             updated_at: new Date().toISOString(),
           };
         }
-        return opSelected;
+        return opItem;
       });
 
       mutate(newData, false);
@@ -159,12 +199,63 @@ const Main: React.FC<MainProps> = department => {
     }
   }, [addToast, data, mutate, opNumber, opStatus]);
 
+  const handleClickButtonShowCommitsModal = useCallback(async opItem => {
+    const response = await api.get(`/commits/${opItem.id}`);
+    setDataCommits(response.data);
+    setOp(opItem);
+    setShowCommitsModal(true);
+  }, []);
+
   if (!data) {
     return (
       <Container>
         <h1>Carregando...</h1>
       </Container>
     );
+  }
+
+  // eslint-disable-next-line no-shadow
+  function renderDepartmentList(department: string): React.ReactNode {
+    switch (department) {
+      case 'Almoxarifado':
+        return (
+          <h5>
+            <Badge variant="danger">{department}</Badge>
+          </h5>
+        );
+      case 'Montagem':
+        return (
+          <h5>
+            <Badge variant="primary">{department}</Badge>
+          </h5>
+        );
+      case 'Usinagem':
+        return (
+          <h5>
+            <Badge variant="light">{department}</Badge>
+          </h5>
+        );
+      case 'Pintura':
+        return (
+          <h5>
+            <Badge variant="info">{department}</Badge>
+          </h5>
+        );
+      case 'Elétrica':
+        return (
+          <h5>
+            <Badge variant="warning">{department}</Badge>
+          </h5>
+        );
+      case 'Calderaria':
+        return (
+          <h5>
+            <Badge variant="secondary">{department}</Badge>
+          </h5>
+        );
+      default:
+        return <td>{department}</td>;
+    }
   }
 
   const renderSwitch = (param: string): React.ReactNode => {
@@ -189,11 +280,20 @@ const Main: React.FC<MainProps> = department => {
         );
     }
   };
-
   return (
     <>
-      <Header  />
-
+      <Header />
+      <Cont>
+        <PrintModal
+          isOpen={showCommitsModal}
+          handleClose={handleClose}
+          commitsData={dataCommits}
+          data={data}
+          op_part_number={op.part_number}
+          op_number={op.op_number}
+          department={department}
+        />
+      </Cont>
       <Modal
         style={{ color: 'black' }}
         show={showNewOP}
@@ -289,6 +389,30 @@ const Main: React.FC<MainProps> = department => {
           </Modal.Footer>
         </FormUnform>
       </Modal>
+      {/* Excel modal */}
+      <Modal
+        style={{ color: 'black' }}
+        show={showExcelDownloadModal}
+        onHide={() => setShowExcelDownloadModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Fazer download da tabela de empenhos?</Modal.Title>
+        </Modal.Header>
+        <FormUnform onSubmit={handleClickButtonDowloadExcel}>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowExcelDownloadModal(false)}
+            >
+              Cancelar
+            </Button>
+            <Button variant="success" type="submit">
+              Fazer download
+            </Button>
+          </Modal.Footer>
+        </FormUnform>
+      </Modal>
+      {/* Excel modal */}
       <Container>
         <Button
           variant="outline-warning"
@@ -334,7 +458,7 @@ const Main: React.FC<MainProps> = department => {
                     <td>{opItem.part_number}</td>
                     <td>{opItem.description}</td>
                     <td>{opItem.user.name}</td>
-                    <td>{opItem.department}</td>
+                    <td>{renderDepartmentList(opItem.department)}</td>
                     <td>
                       {format(
                         parseISO(opItem.created_at),
@@ -358,6 +482,23 @@ const Main: React.FC<MainProps> = department => {
                           <FiEdit />
                         </Button>
                       ) : null}{' '}
+                      <Button
+                        variant="link"
+                        onClick={
+                          () => handleClickButtonShowCommitsModal(opItem)
+                          // eslint-disable-next-line react/jsx-curly-newline
+                        }
+                        style={{ color: 'white', padding: 0 }}
+                      >
+                        <FiCheckSquare />
+                      </Button>
+                      <Button
+                        variant="link"
+                        onClick={() => handleExcel(opItem)}
+                        style={{ color: 'white', padding: 0 }}
+                      >
+                        <FiDownload />
+                      </Button>
                       <Button
                         variant="link"
                         onClick={() => handleExcludeID(opItem)}

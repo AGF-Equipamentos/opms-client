@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/data-grid": "^4.0.0-alpha.37",
+    "@material-ui/styles": "^4.11.4",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@types/file-saver": "^2.0.3",
     "@types/jest": "^24.0.0",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
@@ -16,6 +20,7 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.6.0",
     "date-fns": "^2.18.0",
+    "file-saver": "^2.0.5",
     "pivottable": "^2.23.0",
     "polished": "^3.5.2",
     "react": "^16.13.1",
@@ -30,6 +35,7 @@
     "swr": "^0.3.4",
     "typescript": "3.8",
     "uuidv4": "^6.0.8",
+    "xlsx": "^0.17.2",
     "yup": "^0.28.5"
   },
   "scripts": {
