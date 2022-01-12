@@ -41,7 +41,7 @@ type MainProps = {
 
 const Main: React.FC<MainProps> = ({ department }) => {
   const { data, mutate } = useFetch<Data[]>(
-    `ops?department=${department}`,
+    department ? `ops?department=${department}` : `ops`,
     {},
     60000,
   );
