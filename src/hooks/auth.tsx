@@ -22,6 +22,7 @@ interface SignInCredentials {
 
 interface AuthContextData {
   user: User;
+  // eslint-disable-next-line no-unused-vars
   signIn(credentials: SignInCredentials): Promise<User>;
   signOut(): void;
   // loading: boolean;
@@ -45,22 +46,25 @@ const AuthProvider: React.FC = ({ children }) => {
     return {} as AuthState;
   });
 
-  const signIn = useCallback(async ({ username, password }) => {
-    const response = await api.post('sessions', {
-      username,
-      password,
-    });
+  const signIn = useCallback(
+    async ({ username, password }: SignInCredentials) => {
+      const response = await api.post('sessions', {
+        username,
+        password,
+      });
 
-    const { token, user } = response.data;
-    api.defaults.headers.authorization = `Bearer ${token}`;
+      const { token, user } = response.data;
+      api.defaults.headers.authorization = `Bearer ${token}`;
 
-    localStorage.setItem('@OPms:token', token);
-    localStorage.setItem('@OPms:user', JSON.stringify(user));
+      localStorage.setItem('@OPms:token', token);
+      localStorage.setItem('@OPms:user', JSON.stringify(user));
 
-    setData({ token, user });
+      setData({ token, user });
 
-    return response.data.user;
-  }, []);
+      return response.data.user;
+    },
+    [],
+  );
 
   const signOut = useCallback(() => {
     localStorage.removeItem('@OPms:token');
