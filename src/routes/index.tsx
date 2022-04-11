@@ -12,6 +12,7 @@ import Montagem from '../pages/Montagem';
 import Calderaria from '../pages/Calderaria';
 import Pintura from '../pages/Pintura';
 import Usinagem from '../pages/Usinagem';
+import BaiaControl from '../pages/BaiaControl';
 
 const Routes: React.FC = () => {
   return (
@@ -24,6 +25,7 @@ const Routes: React.FC = () => {
       <Route path="/montagem" component={Montagem} isPrivate />
       <Route path="/pintura" component={Pintura} isPrivate />
       <Route path="/usinagem" component={Usinagem} isPrivate />
+      <Route path="/baiacontrol" component={BaiaControl} />
     </Switch>
   );
 };
