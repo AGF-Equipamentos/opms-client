@@ -1,7 +1,4 @@
 <h1 align="center">
-  <img alt="AGF BI" src="./src/assets/OPms-1.png" width="900px" style="border-radius:16px;"/>
-</h1>
-<h1 align="center">
   <img alt="AGF BI" src="./src/assets/OPms-2.png" width="900px" style="border-radius:16px;"/>
 </h1>
 
