@@ -43,5 +43,4 @@ jobs:
         password: ${{ secrets.SSH_PASS }}
         script: |
           cd ~/app/opms
-          yarn
-          pm2 restart opms
+          pm2 restart opms-client
