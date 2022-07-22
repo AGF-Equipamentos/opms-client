@@ -22,7 +22,7 @@ jobs:
     - name: Run build
       run: yarn build
       env:
-        REACT_APP_SERVER: http://192.168.2.251:3334
+        REACT_APP_SERVER: ${{ secrets.REACT_APP_SERVER }}
 
     - name: Copy project to AGF
       uses: appleboy/scp-action@master
