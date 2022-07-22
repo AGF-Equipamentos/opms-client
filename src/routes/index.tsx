@@ -17,13 +17,43 @@ const Routes: React.FC = () => {
   return (
     <Switch>
       <Route path="/" exact component={SignIn} />
-      <Route path="/menu" component={Menu} isPrivate />
-      <Route path="/almoxarifado" component={Almoxarifado} isPrivate />
-      <Route path="/calderaria" component={Calderaria} isPrivate />
-      <Route path="/eletrica" component={Eletrica} isPrivate />
-      <Route path="/montagem" component={Montagem} isPrivate />
-      <Route path="/pintura" component={Pintura} isPrivate />
-      <Route path="/usinagem" component={Usinagem} isPrivate />
+      <Route path="/menu" component={Menu} title="Menu | OPms" isPrivate />
+      <Route
+        path="/almoxarifado"
+        component={Almoxarifado}
+        title="Almoxarifado | OPms"
+        isPrivate
+      />
+      <Route
+        path="/calderaria"
+        component={Calderaria}
+        title="Calderaria | OPms"
+        isPrivate
+      />
+      <Route
+        path="/eletrica"
+        component={Eletrica}
+        title="Elétrica | OPms"
+        isPrivate
+      />
+      <Route
+        path="/montagem"
+        component={Montagem}
+        title="Montagem | OPms"
+        isPrivate
+      />
+      <Route
+        path="/pintura"
+        component={Pintura}
+        title="Pintura | OPms"
+        isPrivate
+      />
+      <Route
+        path="/usinagem"
+        component={Usinagem}
+        title="Usinagem | OPms"
+        isPrivate
+      />
     </Switch>
   );
 };
