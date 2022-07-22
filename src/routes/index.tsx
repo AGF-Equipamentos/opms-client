@@ -16,8 +16,8 @@ import Usinagem from '../pages/Usinagem';
 const Routes: React.FC = () => {
   return (
     <Switch>
-      <Route path="/" exact component={SignIn} />
-      <Route path="/menu" component={Menu} title="Menu | OPms" isPrivate />
+      <Route path="/" title="Login | OPms" exact component={SignIn} />
+      <Route path="/menu" component={Menu} isPrivate />
       <Route
         path="/almoxarifado"
         component={Almoxarifado}
