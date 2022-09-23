@@ -21,12 +21,12 @@ export default function generateTxtData(
   oldData: Commit[],
   newData: Commit[],
 ): string[] {
-  return newData.map(commit => {
+  const headerArray = [`|A||508||${completeDate}|`];
+  const commitsArray = newData.map(commit => {
     const oldCommit = oldData.find(commitData => commitData.id === commit.id);
     return [
-      `${completeDate}`,
       '',
-      '508',
+      'B',
       `${commit.part_number}`,
       `${(
         commit.qty_delivered - (oldCommit ? oldCommit.qty_delivered : 0)
@@ -34,6 +34,8 @@ export default function generateTxtData(
       '01',
       '',
       '',
-    ].join(';');
+    ].join('|');
   });
+
+  return [...headerArray, ...commitsArray];
 }
