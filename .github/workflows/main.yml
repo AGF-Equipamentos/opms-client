@@ -32,7 +32,7 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         password: ${{ secrets.SSH_PASS }}
         source: ".,!node_modules"
-        target: "~/app/opms"
+        target: "~/app/opms-client"
 
     - name: Run production scripts
       uses: appleboy/ssh-action@master
@@ -42,5 +42,5 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         password: ${{ secrets.SSH_PASS }}
         script: |
-          cd ~/app/opms
+          cd ~/app/opms-client
           pm2 restart opms-client
