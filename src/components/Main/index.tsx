@@ -24,6 +24,7 @@ export interface Data {
   department: string;
   part_number: string;
   description: string;
+  observation: string;
   created_at: string;
   updated_at: string;
   user: {
@@ -337,7 +338,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
         </FormUnform>
       </Modal>
       <Modal
-        style={{ color: 'black' }}
+        style={{ color: 'black', lg: '992px' }}
         show={showSave}
         onHide={() => setShowSave(false)}
       >
@@ -413,7 +414,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
         </FormUnform>
       </Modal>
       {/* Excel modal */}
-      <Container>
+      <Container fluid style={{ maxWidth: '1440px' }}>
         <Button
           variant="outline-warning"
           size="sm"
@@ -441,6 +442,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
               <th>Descrição</th>
               <th>Aberto por:</th>
               <th>Setor:</th>
+              <th>Observação:</th>
               <th>Criado:</th>
               <th>Atualizado:</th>
               <th>Ações</th>
@@ -459,6 +461,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
                     <td>{opItem.description}</td>
                     <td>{opItem.user.name}</td>
                     <td>{renderDepartmentList(opItem.department)}</td>
+                    <td>{opItem.observation}</td>
                     <td>
                       {format(
                         parseISO(opItem.created_at),
@@ -511,7 +514,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
                 ))
             ) : (
               <tr>
-                <td colSpan={9}>Parece que não há nenhuma OP...</td>
+                <td colSpan={10}>Parece que não há nenhuma OP...</td>
               </tr>
             )}
           </tbody>
@@ -536,6 +539,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
               <th>Descrição</th>
               <th>Aberto por:</th>
               <th>Setor:</th>
+              <th>Observação:</th>
               <th>Criado:</th>
               <th>Atualizado:</th>
               <th>Ações</th>
@@ -553,7 +557,8 @@ const Main: React.FC<MainProps> = ({ department }) => {
                     <td>{opItem.part_number}</td>
                     <td>{opItem.description}</td>
                     <td>{opItem.user.name}</td>
-                    <td>{opItem.department}</td>
+                    <td>{renderDepartmentList(opItem.department)}</td>
+                    <td>{opItem.observation}</td>
                     <td>
                       {format(
                         parseISO(opItem.created_at),
@@ -589,7 +594,7 @@ const Main: React.FC<MainProps> = ({ department }) => {
                 ))
             ) : (
               <tr>
-                <td colSpan={9}>Parece que não há nenhuma OP...</td>
+                <td colSpan={10}>Parece que não há nenhuma OP...</td>
               </tr>
             )}
           </tbody>
